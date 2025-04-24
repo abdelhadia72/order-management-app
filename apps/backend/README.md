@@ -1,98 +1,140 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Order Management System (backend)
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A robust API for managing orders, products, and users with authentication, role-based access control, and comprehensive error handling.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- **User Management**
+  - Registration and authentication
+  - Role-based access (Admin/User)
+  - User profiles
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Product Management**
+  - Create and list products
+  - Product details including price, stock, and description
+  - Owner-based product visibility
 
-## Project setup
+- **Order Management**
+  - Create orders with multiple products
+  - View order history
+  - Order status tracking
 
-```bash
-$ pnpm install
+- **Security**
+  - JWT-based authentication
+  - Password hashing using bcrypt
+  - Role-based access control
+
+- **API Documentation**
+  - Swagger UI integration for easy API exploration
+
+## Tech Stack
+
+- **Backend**: NestJS (TypeScript-based Node.js framework)
+- **Database**: PostgreSQL with Prisma ORM
+- **Authentication**: JWT (JSON Web Tokens)
+- **API Documentation**: Swagger/OpenAPI
+- **Validation**: Class-validator and class-transformer
+- **Testing**: Jest
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v14 or higher)
+- pnpm package manager
+- PostgreSQL database
+
+### Environment Setup
+
+Create a `.env` file in the root directory with the following variables:
+
+```
+DATABASE_URL="postgresql://username:password@localhost:5432/ordermanagement?schema=public"
+JWT_SECRET="your-secret-key"
 ```
 
-## Compile and run the project
+### Installation
 
+1. Clone the repository
+   ```bash
+   git clone https://github.com/abdelhadia72/order-management-system.git
+   cd order-management-system
+   ```
+
+2. Install dependencies
+   ```bash
+   pnpm install
+   ```
+
+3. Generate Prisma client
+   ```bash
+   pnpm prisma:generate
+   ```
+
+4. Run database migrations
+   ```bash
+   pnpm prisma:migrate
+   ```
+
+5. Seed the database (optional)
+   ```bash
+   pnpm prisma:seed
+   ```
+
+### Running the Application
+
+Start the development server:
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm start
 ```
 
-## Run tests
+The API will be available at `http://localhost:8000` by default.
 
-```bash
-# unit tests
-$ pnpm run test
+### API Documentation
 
-# e2e tests
-$ pnpm run test:e2e
+Access the Swagger UI documentation at `http://localhost:8000/api`
 
-# test coverage
-$ pnpm run test:cov
-```
+## API Endpoints
 
-## Deployment
+### Auth
+- `POST /auth/register` - Register a new user
+- `POST /auth/login` - Login and receive JWT token
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### Users
+- `GET /users/me` - Get current user profile
+- `GET /users` - Get all users (admin only)
+- `GET /users/:userId` - Get user by ID (admin only)
+- `POST /users` - Create new user (admin only)
+- `DELETE /users/:userId` - Delete user (admin only)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Products
+- `POST /products` - Create a new product
+- `GET /products` - Get products created by the user
+- `GET /products/admin/all` - Get all products (admin only)
+- `GET /products/:productId` - Get product by ID
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
+### Orders
+- `POST /orders` - Create a new order
+- `GET /orders` - Get orders placed by the user
+- `GET /orders/admin/all` - Get all orders (admin only)
+- `GET /orders/:orderId` - Get order by ID
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+## Default Users
 
-## Resources
+After running the seed command, the following users will be created:
 
-Check out a few resources that may come in handy when working with NestJS:
+- **Admin User**
+  - Email: juma@jumatech.com
+  - Password: juma123
+  - Role: admin
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+- **Regular User 1**
+  - Email: john@example.com
+  - Password: password123
+  - Role: user
 
-## Support
+- **Regular User 2**
+  - Email: jane@example.com
+  - Password: password123
+  - Role: user
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
