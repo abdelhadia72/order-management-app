@@ -1,7 +1,6 @@
-// Helper function to get the auth token
 const getToken = () => localStorage.getItem("token");
+import { API_URL } from "@/lib/api/config";
 
-// Generic fetch function with auth header
 export async function apiFetch<T>(
   endpoint: string,
   options: RequestInit = {}
@@ -19,7 +18,7 @@ export async function apiFetch<T>(
   };
 
   try {
-    const url = `http://localhost:8000${
+    const url = `${API_URL}${
       endpoint.startsWith("/") ? endpoint : "/" + endpoint
     }`;
     console.log(`Making API request to: ${url}`);
@@ -29,7 +28,6 @@ export async function apiFetch<T>(
       headers,
     });
 
-    // Check if response is JSON before trying to parse it
     const contentType = response.headers.get("content-type");
     console.log(
       `API response status: ${response.status}, content-type: ${contentType}`
@@ -42,14 +40,12 @@ export async function apiFetch<T>(
           console.error(`API error: ${response.status}`, errorData);
           throw new Error(errorData.message || `API error: ${response.status}`);
         } catch (e) {
-          // If parsing fails, throw generic error with status
           console.error(
             `API error: ${response.status} (failed to parse error response)`
           );
           throw new Error(`API error: ${response.status}`);
         }
       } else {
-        // Not JSON, might be HTML error page
         const text = await response.text();
         console.error(
           "API returned non-JSON error:",
@@ -59,12 +55,10 @@ export async function apiFetch<T>(
       }
     }
 
-    // For 204 No Content responses
     if (response.status === 204) {
       return {} as T;
     }
 
-    // Ensure we're parsing JSON
     if (contentType && contentType.includes("application/json")) {
       const data = await response.json();
       console.log(
@@ -83,7 +77,6 @@ export async function apiFetch<T>(
   }
 }
 
-// HTTP method wrappers
 export function apiGet<T>(endpoint: string, options?: RequestInit): Promise<T> {
   return apiFetch<T>(endpoint, { method: "GET", ...options });
 }
