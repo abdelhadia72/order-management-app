@@ -1,33 +1,32 @@
-import { create } from "zustand"
-import { persist } from "zustand/middleware"
-import { API_URL } from "@/lib/api/config"
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query"
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import { API_URL } from "@/lib/api/config";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type User = {
-  id: string
-  name: string
-  email: string
-  role: "user" | "admin"
-}
+  id: string;
+  name: string;
+  email: string;
+  role: "user" | "admin";
+};
 
 type AuthState = {
-  user: User | null
-  token: string | null
-  isAuthenticated: boolean
-  isLoading: boolean
-  login: (email: string, password: string) => Promise<void>
-  register: (name: string, email: string, password: string) => Promise<void>
-  logout: () => void
-  checkAuth: () => Promise<void>
-}
+  user: User | null;
+  token: string | null;
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => void;
+  checkAuth: () => Promise<void>;
+};
 
-// API functions
 const loginApi = async (email: string, password: string) => {
   if (!API_URL) {
     throw new Error("API URL is not defined");
   }
 
-  const response = await fetch(`http://localhost:8000/auth/login`, {
+  const response = await fetch(`${API_URL}/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email, password }),
@@ -38,24 +37,21 @@ const loginApi = async (email: string, password: string) => {
     try {
       const errorData = await response.json();
       errorMessage = errorData.message || errorMessage;
-    } catch {
-      // If parsing fails, use default error message
-    }
+    } catch {}
     throw new Error(errorMessage);
   }
 
   const data = await response.json();
   console.log("Login response data:", data);
 
-  // Transform the data to match the expected format
   return {
     user: {
       id: data.user.userId.toString(),
       name: data.user.name,
       email: data.user.email,
-      role: data.user.role
+      role: data.user.role,
     },
-    token: data.access_token
+    token: data.access_token,
   };
 };
 
@@ -75,8 +71,7 @@ const registerApi = async (name: string, email: string, password: string) => {
     try {
       const errorData = await response.json();
       errorMessage = errorData.message || errorMessage;
-    } catch {
-    }
+    } catch {}
     throw new Error(errorMessage);
   }
 
@@ -115,14 +110,14 @@ export const useAuthStore = create<AuthState>()(
         try {
           const data = await loginApi(email, password);
 
-          if (typeof window !== 'undefined') {
+          if (typeof window !== "undefined") {
             localStorage.setItem("token", data.token);
           }
 
           set({
             user: data.user,
             token: data.token,
-            isAuthenticated: true
+            isAuthenticated: true,
           });
         } catch (error) {
           console.error("Login error:", error);
@@ -137,7 +132,6 @@ export const useAuthStore = create<AuthState>()(
 
         try {
           await registerApi(name, email, password);
-          // Registration successful, but we don't auto-login
         } catch (error) {
           console.error("Registration error:", error);
           throw error;
@@ -147,19 +141,17 @@ export const useAuthStore = create<AuthState>()(
       },
 
       logout: () => {
-        if (typeof window !== 'undefined') {
+        if (typeof window !== "undefined") {
           localStorage.removeItem("token");
         }
         set({ user: null, token: null, isAuthenticated: false });
       },
 
       checkAuth: async () => {
-        // Skip auth check if we're already loading or if we're not in a browser
-        if (get().isLoading || typeof window === 'undefined') {
+        if (get().isLoading || typeof window === "undefined") {
           return Promise.resolve();
         }
 
-        // If already authenticated, don't check again to prevent loops
         if (get().isAuthenticated) {
           return Promise.resolve();
         }
@@ -167,7 +159,10 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: true });
 
         try {
-          const token = typeof window !== 'undefined' ? localStorage.getItem("token") : null;
+          const token =
+            typeof window !== "undefined"
+              ? localStorage.getItem("token")
+              : null;
 
           if (!token) {
             set({ isLoading: false });
@@ -178,11 +173,11 @@ export const useAuthStore = create<AuthState>()(
           set({
             user: userData,
             token,
-            isAuthenticated: true
+            isAuthenticated: true,
           });
         } catch (error) {
           console.error("Auth check error:", error);
-          if (typeof window !== 'undefined') {
+          if (typeof window !== "undefined") {
             localStorage.removeItem("token");
           }
           set({ user: null, token: null, isAuthenticated: false });
@@ -196,34 +191,41 @@ export const useAuthStore = create<AuthState>()(
       partialize: (state) => ({
         user: state.user,
         token: state.token,
-        isAuthenticated: state.isAuthenticated
+        isAuthenticated: state.isAuthenticated,
       }),
-    },
-  ),
+    }
+  )
 );
 
-// React Query hooks for authentication
 export const useLogin = () => {
   const { login } = useAuthStore();
   return useMutation({
-    mutationFn: ({ email, password }: { email: string, password: string }) => login(email, password)
+    mutationFn: ({ email, password }: { email: string; password: string }) =>
+      login(email, password),
   });
 };
 
 export const useRegister = () => {
   return useMutation({
-    mutationFn: ({ name, email, password }: { name: string, email: string, password: string }) =>
-      useAuthStore.getState().register(name, email, password)
+    mutationFn: ({
+      name,
+      email,
+      password,
+    }: {
+      name: string;
+      email: string;
+      password: string;
+    }) => useAuthStore.getState().register(name, email, password),
   });
 };
 
 export const useAuthCheck = () => {
   const { checkAuth } = useAuthStore();
   return useQuery({
-    queryKey: ['auth', 'check'],
+    queryKey: ["auth", "check"],
     queryFn: checkAuth,
     retry: false,
-    refetchOnWindowFocus: false
+    refetchOnWindowFocus: false,
   });
 };
 
@@ -237,7 +239,7 @@ export const useLogout = () => {
       return Promise.resolve();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auth'] });
-    }
+      queryClient.invalidateQueries({ queryKey: ["auth"] });
+    },
   });
 };
